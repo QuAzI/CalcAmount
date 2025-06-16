@@ -37,10 +37,10 @@ namespace CalcAmount.Controllers.Api
 
             var rates = await CurrenciesService.GetRatesFromDate(request.Currencies, reportFrom);
 
-            var dateReports = new List<DateReport>();
+            var dateReports = new List<DateReportResponse>();
             foreach (var reportingDate in reportingDates)
             {
-                var rate = new DateReport
+                var rate = new DateReportResponse
                 {
                     Date = reportingDate
                 };
@@ -50,7 +50,7 @@ namespace CalcAmount.Controllers.Api
                 {
                     foreach (var specificRate in dateRates)
                     {
-                        rate.CurrencyRates.Add(new Rate
+                        rate.CurrencyRates.Add(new CurrencyRateResponse
                         {
                             Direction = BaseCurrency + "/" + specificRate.Key,
                             Value = specificRate.Value * request.Amount
@@ -96,27 +96,27 @@ namespace CalcAmount.Controllers.Api
 
         private void TagExtremeCases(RatesResponse rates)
         {
-            var minRates = new Dictionary<string, List<Rate>>();
-            var maxRates = new Dictionary<string, List<Rate>>();
+            var minRates = new Dictionary<string, List<CurrencyRateResponse>>();
+            var maxRates = new Dictionary<string, List<CurrencyRateResponse>>();
 
             foreach (var dateReport in rates.Dates)
             {
                 foreach (var rate in dateReport.CurrencyRates)
                 {
-                    var hasMinValue = minRates.TryGetValue(rate.Direction, out List<Rate> minRateItems);
+                    var hasMinValue = minRates.TryGetValue(rate.Direction, out List<CurrencyRateResponse> minRateItems);
                     if (!hasMinValue || (hasMinValue && minRateItems[0].Value > rate.Value))
                     {
-                        minRates[rate.Direction] = new List<Rate> { rate };
+                        minRates[rate.Direction] = new List<CurrencyRateResponse> { rate };
                     }
                     else if (minRateItems[0].Value == rate.Value)
                     {
                         minRateItems.Add(rate);
                     }
 
-                    var hasMaxValue = maxRates.TryGetValue(rate.Direction, out List<Rate> maxRateItems);
+                    var hasMaxValue = maxRates.TryGetValue(rate.Direction, out List<CurrencyRateResponse> maxRateItems);
                     if (!hasMinValue || (hasMinValue && maxRateItems[0].Value < rate.Value))
                     {
-                        maxRates[rate.Direction] = new List<Rate> { rate };
+                        maxRates[rate.Direction] = new List<CurrencyRateResponse> { rate };
                     }
                     else if (maxRateItems[0].Value == rate.Value)
                     {

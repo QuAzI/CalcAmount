@@ -8,6 +8,6 @@ namespace CalcAmount.Services
     public interface ICurrenciesService
     {
         Task<IReadOnlyDictionary<string, string>> GetCurrenciesAsync();
-        Task<CurrenciesResponse> GetRatesFromDate(IReadOnlyList<string> currencies, DateTime startingDate);
+        Task<CurrenciesReportModel> GetRatesFromDate(IReadOnlyList<string> currencies, DateTime startingDate);
     }
 }

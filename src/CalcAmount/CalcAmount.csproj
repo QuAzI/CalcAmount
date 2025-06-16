@@ -184,10 +184,12 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\DateOnlyConverter.cs" />
     <Compile Include="Interfaces\ICurrenciesService.cs" />
-    <Compile Include="Models\CurrenciesResponse.cs" />
-    <Compile Include="Models\Rate.cs" />
-    <Compile Include="Models\DateReport.cs" />
+    <Compile Include="Models\CurrenciesReportModel.cs" />
+    <Compile Include="Models\CurrencyRateResponse.cs" />
+    <Compile Include="Models\DateReportResponse.cs" />
+    <Compile Include="Helpers\FourDecimalDoubleConverter.cs" />
     <Compile Include="Models\RatesRequest.cs" />
     <Compile Include="Models\RatesResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

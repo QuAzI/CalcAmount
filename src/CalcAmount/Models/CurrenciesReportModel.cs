@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace CalcAmount.Models
 {
-    public class CurrenciesResponse
+    public class CurrenciesReportModel
     {
         [JsonProperty("base")]
         public string Base { get; set; }

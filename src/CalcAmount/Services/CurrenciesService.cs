@@ -41,13 +41,13 @@ namespace CalcAmount.Services
             }
         }
 
-        public async Task<CurrenciesResponse> GetRatesFromDate(IReadOnlyList<string> currencies, DateTime startingDate)
+        public async Task<CurrenciesReportModel> GetRatesFromDate(IReadOnlyList<string> currencies, DateTime startingDate)
         {
             var key = startingDate.ToString("yyyy-MM-dd") + ".." +
                 "?symbols=" + string.Join(",", currencies);
 
             var memoryCache = MemoryCache.Default;
-            var cached = memoryCache.Get(key) as CurrenciesResponse;
+            var cached = memoryCache.Get(key) as CurrenciesReportModel;
             if (cached != null)
             {
                 return cached;
@@ -59,7 +59,7 @@ namespace CalcAmount.Services
 
                 var jsonResponse = await response.Content.ReadAsStringAsync();
 
-                var model = JsonConvert.DeserializeObject<CurrenciesResponse>(jsonResponse);
+                var model = JsonConvert.DeserializeObject<CurrenciesReportModel>(jsonResponse);
 
                 memoryCache.Set(key, model, DateTime.Now.AddHours(1));
 
