@@ -130,9 +130,11 @@
             const headerCell = document.createElement("td");
             var cell = row.insertCell(-1);
             const columnRate = reportingDate.currencyRates.find(x => x.direction === headerText);
-            cell.innerHTML = columnRate.value;
-            if (columnRate.tags.length) {
-              cell.classList.add(columnRate.tags);
+            if (columnRate) {
+              cell.innerHTML = columnRate.value;
+              if (columnRate.tags.length) {
+                cell.classList.add(columnRate.tags);
+              }
             }
           });
         });
