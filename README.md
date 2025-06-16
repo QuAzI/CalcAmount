@@ -1,3 +1,5 @@
+![preview](preview.png)
+
 # Calculate amount assignment  
 
 ## 1.  We are going to use https://www.frankfurter.app/  to fetch currency rates 
