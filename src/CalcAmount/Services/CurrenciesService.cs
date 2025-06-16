@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Runtime.Caching;
 
 namespace CalcAmount.Services
 {
@@ -12,11 +13,6 @@ namespace CalcAmount.Services
     {
         private static readonly HttpClient Client = new HttpClient()
         {
-            //var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None),
-
-            //ConfigurationSettings.AppSettings.Settings
-            //var address = ConfigurationSettings.AppSettings("dsn"),
-            //BaseAddress = new Uri("https://api.frankfurter.dev/v1/")
 #pragma warning disable CS0618 // Type or member is obsolete
             BaseAddress = new Uri(ConfigurationSettings.AppSettings["ApiEndpoint"])
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -24,6 +20,13 @@ namespace CalcAmount.Services
 
         public async Task<IReadOnlyDictionary<string, string>> GetCurrenciesAsync()
         {
+            var memoryCache = MemoryCache.Default;
+            var cached = memoryCache.Get("currencies") as IReadOnlyDictionary<string, string>;
+            if (cached != null)
+            {
+                return cached;
+            }
+
             using (HttpResponseMessage response = await Client.GetAsync("currencies"))
             {
                 response.EnsureSuccessStatusCode();
@@ -32,39 +35,36 @@ namespace CalcAmount.Services
 
                 var model = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonResponse);
 
+                memoryCache.Set("currencies", model, DateTime.Now.AddHours(12));
+
                 return model;
-                //Directory.CreateDirectory("c:\\temp\\cache");
-                //File.WriteAllText(cache, jsonResponse);
             }
         }
 
         public async Task<CurrenciesResponse> GetRatesFromDate(IReadOnlyList<string> currencies, DateTime startingDate)
         {
-            var path = startingDate.ToString("yyyy-MM-dd") + ".." +
+            var key = startingDate.ToString("yyyy-MM-dd") + ".." +
                 "?symbols=" + string.Join(",", currencies);
 
-            //var cache = $"c:\\temp\\cache\\rates-{path.GetHashCode()}.json";
-
-            //if (!File.Exists(cache))
+            var memoryCache = MemoryCache.Default;
+            var cached = memoryCache.Get(key) as CurrenciesResponse;
+            if (cached != null)
             {
-                using (HttpResponseMessage response = await Client.GetAsync(path))
-                {
-                    response.EnsureSuccessStatusCode();
-
-                    var jsonResponse = await response.Content.ReadAsStringAsync();
-                    
-                    var model = JsonConvert.DeserializeObject<CurrenciesResponse>(jsonResponse);
-
-                    //Directory.CreateDirectory("c:\\temp\\cache");
-                    //File.WriteAllText(cache, jsonResponse);
-                    return model;
-                }
+                return cached;
             }
 
-            //var data = File.ReadAllText(cache);
-            //var model = JsonConvert.DeserializeObject<CurrenciesResponse>(data);
+            using (HttpResponseMessage response = await Client.GetAsync(key))
+            {
+                response.EnsureSuccessStatusCode();
 
-            //return model;
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+
+                var model = JsonConvert.DeserializeObject<CurrenciesResponse>(jsonResponse);
+
+                memoryCache.Set(key, model, DateTime.Now.AddHours(1));
+
+                return model;
+            }
         }
     }
 }
