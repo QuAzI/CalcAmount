@@ -1,0 +1,118 @@
+﻿@{
+  ViewBag.Title = "Convert currency";
+}
+
+<style>
+</style>
+
+<main>
+  <section class="flex-column" aria-labelledby="aspnetTitle">
+    <h1 id="title">@ViewBag.Title</h1>
+    <form id="user-currencies">
+      <p class="lead">Please fill amount and choose conversion</p>
+      <div class="flex-column container">
+        <div class="input-group mb-3 class=" row"">
+          <div class="input-group-prepend col-3">
+            <span class="input-group-text" id="amount-title">Amount in EUR</span>
+          </div>
+          <input id="amount" class="form-control col mx-3" type="number" name="amount" value="42" min="0.01" step="0.01" pattern="\d+(\.\d{2})?" aria-describedby="amount-title" />
+        </div>
+
+        <div class="input-group mb-3 row">
+          <div class="input-group-prepend col-3">
+            <span class="input-group-text" id="currency1-title">Currency 1</span>
+          </div>
+          <input id="currency1" class="form-control col mx-3" type="text" name="currency1" value="USD" pattern="[A-Z]{3}" aria-describedby="currency1-title" />
+        </div>
+
+        <div class="input-group mb-3 row">
+          <div class="input-group-prepend col-3">
+            <span class="input-group-text" id="currency2-title">Currency 2</span>
+          </div>
+          <input id="currency2" class="form-control col mx-3" type="text" name="currency2" value="ILS" pattern="[A-Z]{3}" aria-describedby="currency2-title" />
+        </div>
+
+        <div class="input-group mb-3 row">
+          <div class="input-group-prepend col-3">
+            <span class="input-group-text" id="currency1-title">Currency 3</span>
+          </div>
+          <input id="currency3" class="form-control col mx-3" type="text" name="currency3" value="CAD" pattern="[A-Z]{3}" aria-describedby="currency3-title" />
+        </div>
+
+        <div class="d-flex justify-content-end"><button class="btn btn-primary btn-md" type="submit">Submit</button></div>
+        <div><label id="error" class="text-bg-danger"></label></div>
+      </div>
+    </form>
+    <div>
+      <table id="report" class="table table-striped visually-hidden">
+        <thead class="bg-secondary">
+          <tr>
+            <th scope="col" class="col-3"></th>
+            <th scope="col" class="col" id="column1">Currency1</th>
+            <th scope="col" class="col" id="column2">Currency2</th>
+            <th scope="col" class="col" id="column3">Currency3</th>
+          </tr>
+        </thead>
+        <tbody>          
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+  $('#user-currencies').submit(function (event) {
+    event.preventDefault();
+    $("#error").text("");
+
+    var postData = {
+      "amount": $("#amount").val(),
+      "currencies": [$("#currency1").val(), $("#currency2").val(), $("#currency3").val()]
+    };
+
+    const table = document.getElementById('report');
+
+    $.ajax({
+      type: "post",
+      url: "/api/v1.0/rates",
+      data: JSON.stringify(postData),
+      contentType: "application/json",
+      success: function (responseData, textStatus, jqXHR) {
+        table.classList.remove('visually-hidden');
+
+        const rowCount = table.rows.length;
+        for (let i = rowCount - 1; i > 0; i--) {
+          table.deleteRow(i);
+        }
+
+        var headers = table.getElementsByTagName('th');
+        headers[1].innerText = responseData.directions[0];
+        headers[2].innerText = responseData.directions[1];
+        headers[3].innerText = responseData.directions[2];
+        
+        responseData.rates.forEach(item => {
+          var row = table.tBodies[0].insertRow(-1);
+
+          var date = row.insertCell(0);
+          var currency1 = row.insertCell(1);
+          var currency2 = row.insertCell(2);
+          var currency3 = row.insertCell(3);
+
+          date.innerHTML = item.date;
+          currency1.innerHTML = item.rates[0].value;
+          currency2.innerHTML = item.rates[1].value;
+          currency3.innerHTML = item.rates[2].value;
+        });
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.error(errorThrown, jqXHR.status, jqXHR.responseText);
+        var errorMessage = "Wrong response: " + jqXHR.status;
+        if (jqXHR.status == 400) {
+          errorMessage += " " + jqXHR.responseText;
+        }
+        $("#error").text(errorMessage);
+        table.classList.add('visually-hidden');
+      }
+    });
+  });
+</script>
