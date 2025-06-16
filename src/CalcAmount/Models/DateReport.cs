@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace CalcAmount.Models
 {
-    public class RateResponse
+    public class DateReport
     {
         public DateTime Date { get; set; }
-        public ICollection<Rate> Rates { get; set; } = new List<Rate>();
+        public ICollection<Rate> CurrencyRates { get; set; } = new List<Rate>();
     }
 }

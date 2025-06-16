@@ -1,5 +1,4 @@
-﻿using CalcAmount.Controllers.Api;
-using CalcAmount.Models;
+﻿using CalcAmount.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

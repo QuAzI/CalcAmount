@@ -180,14 +180,14 @@
     <Compile Include="App_Start\UnityWebApiActivator.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\RatesController.cs" />
+    <Compile Include="Controllers\Api\RatesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\ICurrenciesService.cs" />
     <Compile Include="Models\CurrenciesResponse.cs" />
     <Compile Include="Models\Rate.cs" />
-    <Compile Include="Models\RateResponse.cs" />
+    <Compile Include="Models\DateReport.cs" />
     <Compile Include="Models\RatesRequest.cs" />
     <Compile Include="Models\RatesResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

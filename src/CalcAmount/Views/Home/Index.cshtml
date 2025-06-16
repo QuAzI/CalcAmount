@@ -3,6 +3,13 @@
 }
 
 <style>
+  td.min {
+    color: red !important;
+  }
+
+  td.max {
+    color: green !important;
+  }
 </style>
 
 <main>
@@ -113,17 +120,20 @@
 
         thead.appendChild(headerRow);
         
-        responseData.rates.forEach(rate => {
+        responseData.dates.forEach(reportingDate => {
           var row = table.tBodies[0].insertRow(-1);
 
           var date = row.insertCell(0);
-          date.innerHTML = rate.date;
+          date.innerHTML = reportingDate.date;
 
           responseData.directions.forEach((headerText) => {
             const headerCell = document.createElement("td");
             var cell = row.insertCell(-1);
-            const columnRate = rate.rates.find(x => x.direction === headerText);
+            const columnRate = reportingDate.currencyRates.find(x => x.direction === headerText);
             cell.innerHTML = columnRate.value;
+            if (columnRate.tags.length) {
+              cell.classList.add(columnRate.tags);
+            }
           });
         });
 
