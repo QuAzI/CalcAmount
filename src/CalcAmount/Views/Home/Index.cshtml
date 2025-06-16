@@ -22,22 +22,29 @@
           <div class="input-group-prepend col-3">
             <span class="input-group-text" id="currency1-title">Currency 1</span>
           </div>
-          <input id="currency1" class="form-control col mx-3" type="text" name="currency1" value="USD" pattern="[A-Z]{3}" aria-describedby="currency1-title" />
+          <input id="currency1" class="form-control col mx-3" type="text" name="currency1" value="USD" list="currencies-list" pattern="[A-Z]{3}?" aria-describedby="currency1-title" />
         </div>
 
         <div class="input-group mb-3 row">
           <div class="input-group-prepend col-3">
             <span class="input-group-text" id="currency2-title">Currency 2</span>
           </div>
-          <input id="currency2" class="form-control col mx-3" type="text" name="currency2" value="ILS" pattern="[A-Z]{3}" aria-describedby="currency2-title" />
+          <input id="currency2" class="form-control col mx-3" type="text" name="currency2" value="ILS" list="currencies-list" pattern="[A-Z]{3}?" aria-describedby="currency2-title" />
         </div>
 
         <div class="input-group mb-3 row">
           <div class="input-group-prepend col-3">
             <span class="input-group-text" id="currency1-title">Currency 3</span>
           </div>
-          <input id="currency3" class="form-control col mx-3" type="text" name="currency3" value="CAD" pattern="[A-Z]{3}" aria-describedby="currency3-title" />
+          <input id="currency3" class="form-control col mx-3" type="text" name="currency3" value="CAD" list="currencies-list" pattern="[A-Z]{3}?" aria-describedby="currency3-title" />
         </div>
+
+        <datalist id="currencies-list">
+          @foreach (var currency in ViewBag.Currencies)
+          {
+            <option value="@currency"></option>
+          }
+        </datalist>
 
         <div class="d-flex justify-content-end"><button class="btn btn-primary btn-md" type="submit">Submit</button></div>
         <div><label id="error" class="text-bg-danger"></label></div>
@@ -48,9 +55,9 @@
         <thead class="bg-secondary">
           <tr>
             <th scope="col" class="col-3"></th>
-            <th scope="col" class="col" id="column1">Currency1</th>
-            <th scope="col" class="col" id="column2">Currency2</th>
-            <th scope="col" class="col" id="column3">Currency3</th>
+            <th scope="col" class="col">Currency1</th>
+            <th scope="col" class="col">Currency2</th>
+            <th scope="col" class="col">Currency3</th>
           </tr>
         </thead>
         <tbody>          
@@ -67,7 +74,11 @@
 
     var postData = {
       "amount": $("#amount").val(),
-      "currencies": [$("#currency1").val(), $("#currency2").val(), $("#currency3").val()]
+      "currencies": [
+        $("#currency1").val() || "",
+        $("#currency2").val() || "",
+        $("#currency3").val() || ""
+      ]
     };
 
     const table = document.getElementById('report');
@@ -78,31 +89,45 @@
       data: JSON.stringify(postData),
       contentType: "application/json",
       success: function (responseData, textStatus, jqXHR) {
-        table.classList.remove('visually-hidden');
+        const thead = table.getElementsByTagName('thead')[0];
 
-        const rowCount = table.rows.length;
-        for (let i = rowCount - 1; i > 0; i--) {
-          table.deleteRow(i);
-        }
+        $('#report thead').empty();
+        $('#report tbody').empty();
 
-        var headers = table.getElementsByTagName('th');
-        headers[1].innerText = responseData.directions[0];
-        headers[2].innerText = responseData.directions[1];
-        headers[3].innerText = responseData.directions[2];
+        const headerRow = document.createElement("tr");
+
+        // dates
+        const headerCell = document.createElement("th");
+        headerCell.classList.add("col-3");
+        headerCell.scope = "col";
+        headerRow.append(headerCell);
+
+        // currencies
+        responseData.directions.forEach((headerText) => {
+          const headerCell = document.createElement("th");
+          headerCell.textContent = headerText;
+          headerCell.classList.add("col");
+          headerCell.scope = "col";
+          headerRow.append(headerCell);
+        });
+
+        thead.appendChild(headerRow);
         
-        responseData.rates.forEach(item => {
+        responseData.rates.forEach(rate => {
           var row = table.tBodies[0].insertRow(-1);
 
           var date = row.insertCell(0);
-          var currency1 = row.insertCell(1);
-          var currency2 = row.insertCell(2);
-          var currency3 = row.insertCell(3);
+          date.innerHTML = rate.date;
 
-          date.innerHTML = item.date;
-          currency1.innerHTML = item.rates[0].value;
-          currency2.innerHTML = item.rates[1].value;
-          currency3.innerHTML = item.rates[2].value;
+          responseData.directions.forEach((headerText) => {
+            const headerCell = document.createElement("td");
+            var cell = row.insertCell(-1);
+            const columnRate = rate.rates.find(x => x.direction === headerText);
+            cell.innerHTML = columnRate.value;
+          });
         });
+
+        table.classList.remove('visually-hidden');
       },
       error: function (jqXHR, textStatus, errorThrown) {
         console.error(errorThrown, jqXHR.status, jqXHR.responseText);

@@ -1,0 +1,7 @@
+###
+# Currencies
+GET https://api.frankfurter.dev/v1/currencies
+
+###
+# Rates
+GET https://api.frankfurter.dev/v1/2025-04-28..?symbols=USD,ILS,CAD

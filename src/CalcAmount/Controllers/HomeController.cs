@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 
 namespace CalcAmount.Controllers
 {
@@ -10,6 +6,22 @@ namespace CalcAmount.Controllers
     {
         public ActionResult Index()
         {
+            //var httpClient = new HttpClient()
+            //{
+            //    BaseAddress = new Uri("https://api.frankfurter.dev/v1/"),
+            //};
+
+            //using (HttpResponseMessage response = await httpClient.GetAsync(path))
+            //{
+            //    response.EnsureSuccessStatusCode();
+
+            //    var jsonResponse = await response.Content.ReadAsStringAsync();
+
+            //    Directory.CreateDirectory("c:\\temp\\cache");
+            //    File.WriteAllText(cache, jsonResponse);
+            //}
+
+            ViewBag.Currencies = new[] { "USD", "CAN" };
             return View();
         }
 

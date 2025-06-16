@@ -12,7 +12,7 @@ namespace CalcAmount.Controllers.Api
     [RoutePrefix("api/v1.0/rates")]
     public class RatesController : ApiController
     {
-        private static HttpClient httpClient = new HttpClient()
+        private static readonly HttpClient httpClient = new HttpClient()
         {
             BaseAddress = new Uri("https://api.frankfurter.dev/v1/"),
         };
@@ -28,9 +28,10 @@ namespace CalcAmount.Controllers.Api
         [Route("")]
         public async Task<IHttpActionResult> Post([FromBody] RatesRequest request)
         {
-            var response = new RatesResponse();
-
-            response.Directions = request.Currencies.Select(t => "EUR/" + t).ToArray();
+            var response = new RatesResponse
+            {
+                Directions = request.Currencies.Where(t => !string.IsNullOrEmpty(t)).Select(t => "EUR/" + t).ToArray()
+            };
 
             var closestMonday = DateTime.Now.Date;
             while (closestMonday.DayOfWeek != DayOfWeek.Monday)
