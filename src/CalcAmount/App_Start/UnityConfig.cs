@@ -3,6 +3,8 @@ using System.Web.Mvc;
 using Unity;
 using Unity.AspNet.Mvc;
 
+using CalcAmount.Services;
+
 namespace CalcAmount
 {
     /// <summary>
@@ -43,15 +45,11 @@ namespace CalcAmount
 
             // TODO: Register your type's mappings here.
             // container.RegisterType<IProductRepository, ProductRepository>();
+            container.RegisterType<ICurrenciesService, CurrenciesService>();
         }
 
         public static void RegisterComponents()
         {
-            //var container = new UnityContainer();
-
-            // register all your components with the container here
-            // it is NOT necessary to register your controllers
-            // e.g. container.RegisterType<ITestService, TestService>(); 
             DependencyResolver.SetResolver(new UnityDependencyResolver(Container));
         }
     }

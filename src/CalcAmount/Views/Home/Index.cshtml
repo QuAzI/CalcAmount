@@ -42,7 +42,7 @@
         <datalist id="currencies-list">
           @foreach (var currency in ViewBag.Currencies)
           {
-            <option value="@currency"></option>
+            <option value="@currency.Key">@currency.Key @currency.Value</option>
           }
         </datalist>
 

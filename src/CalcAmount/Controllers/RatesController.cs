@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using CalcAmount.Models;
+using CalcAmount.Services;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,10 +14,12 @@ namespace CalcAmount.Controllers.Api
     [RoutePrefix("api/v1.0/rates")]
     public class RatesController : ApiController
     {
-        private static readonly HttpClient httpClient = new HttpClient()
+        public ICurrenciesService CurrenciesService { get; }
+
+        public RatesController(ICurrenciesService currenciesService)
         {
-            BaseAddress = new Uri("https://api.frankfurter.dev/v1/"),
-        };
+            CurrenciesService = currenciesService;
+        }
 
         [HttpGet]
         [Route("")]
@@ -40,7 +44,7 @@ namespace CalcAmount.Controllers.Api
             }
             var startingDate = DateTime.Now.AddDays(-7 * 7);
 
-            var rates = await GetRatesFromDate(request.Currencies, startingDate);
+            var rates = await CurrenciesService.GetRatesFromDate(request.Currencies, startingDate);
 
             var reportDate = closestMonday;
             while (reportDate >= startingDate)
@@ -69,66 +73,5 @@ namespace CalcAmount.Controllers.Api
 
             return Ok(response);
         }
-
-        private async Task<CurrenciesResponse> GetRatesFromDate(IReadOnlyList<string> currencies, DateTime startingDate)
-        {
-            var path = startingDate.ToString("yyyy-MM-dd") + ".." +
-                "?symbols=" + string.Join(",", currencies);
-
-            var cache = $"c:\\temp\\cache\\rates-{path.GetHashCode()}.json";
-
-            if (!File.Exists(cache))
-            {
-                using (HttpResponseMessage response = await httpClient.GetAsync(path))
-                {
-                    response.EnsureSuccessStatusCode();
-
-                    var jsonResponse = await response.Content.ReadAsStringAsync();
-
-                    Directory.CreateDirectory("c:\\temp\\cache");
-                    File.WriteAllText(cache, jsonResponse);
-                }
-            }
-
-            var data = File.ReadAllText(cache);
-            var model = JsonConvert.DeserializeObject<CurrenciesResponse>(data);
-            
-            return model;
-        }
-    }
-
-    public class RatesRequest
-    {
-        public float Amount { get; set; }
-        public IReadOnlyList<string> Currencies { get; set; }
-    }
-
-    public class RatesResponse
-    {
-        public ICollection<RateResponse> Rates { get; set; } = new List<RateResponse>();
-        public ICollection<string> Directions { get; internal set; }
-    }
-
-    public class RateResponse
-    {
-        public DateTime Date { get; set; }
-        public ICollection<Rate> Rates { get; set; } = new List<Rate>();
-    }
-
-    public class Rate
-    {
-        public string Direction { get; set; }
-        public double Value { get; set; }
-    }
-
-    public class CurrenciesResponse
-    {
-        [JsonProperty("base")]
-        public string Base { get; set; }
-        [JsonProperty("start_date")]
-        public DateTime StartDate { get; set; }
-        [JsonProperty("end_date")]
-        public DateTime EndDate { get; set; }
-        public Dictionary<DateTime, Dictionary<string, double>> Rates { get; set; }
     }
 }

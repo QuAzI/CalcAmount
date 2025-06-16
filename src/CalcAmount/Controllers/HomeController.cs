@@ -1,27 +1,21 @@
-﻿using System.Web.Mvc;
+﻿using CalcAmount.Services;
+using System.Threading.Tasks;
+using System.Web.Mvc;
 
 namespace CalcAmount.Controllers
 {
     public class HomeController : Controller
     {
-        public ActionResult Index()
+        public ICurrenciesService CurrenciesService { get; }
+
+        public HomeController(ICurrenciesService currenciesService)
         {
-            //var httpClient = new HttpClient()
-            //{
-            //    BaseAddress = new Uri("https://api.frankfurter.dev/v1/"),
-            //};
+            CurrenciesService = currenciesService;
+        }
 
-            //using (HttpResponseMessage response = await httpClient.GetAsync(path))
-            //{
-            //    response.EnsureSuccessStatusCode();
-
-            //    var jsonResponse = await response.Content.ReadAsStringAsync();
-
-            //    Directory.CreateDirectory("c:\\temp\\cache");
-            //    File.WriteAllText(cache, jsonResponse);
-            //}
-
-            ViewBag.Currencies = new[] { "USD", "CAN" };
+        public async Task<ActionResult> Index()
+        {
+            ViewBag.Currencies = await CurrenciesService.GetCurrenciesAsync();
             return View();
         }
 
